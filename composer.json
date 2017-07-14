@@ -21,7 +21,7 @@
       "url": "https://packagist.phpcomposer.com"
     }
   },
-  "minimum-stability": "dev",
+  "minimum-stability": "stable",
   "require": {
     "pimple/pimple": "^3.1"
   },
