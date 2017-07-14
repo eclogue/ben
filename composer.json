@@ -1,0 +1,31 @@
+{
+  "name": "racecourse/ben",
+  "description": "php config",
+  "type": "scv",
+  "license": "MIT",
+  "version": "1.0.0",
+  "authors": [
+    {
+      "name": "bugbear",
+      "email": "yuhe.wei@upai.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Ben\\": "src/"
+    }
+  },
+  "repositories": {
+    "packagist": {
+      "type": "composer",
+      "url": "https://packagist.phpcomposer.com"
+    }
+  },
+  "minimum-stability": "dev",
+  "require": {
+    "pimple/pimple": "^3.1"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^6.1"
+  }
+}

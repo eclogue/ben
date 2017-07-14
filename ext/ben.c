@@ -21,7 +21,17 @@
 #endif
 
 #include "php.h"
+#include "php_ini.h"
 #include "ben.h"
+#include "zend_extensions.h"
+#include "zend_exceptions.h"
+#include "ext/standard/info.h"
+
+#if PHP_VERSION_ID >= 70000
+#include "zend_smart_str.h"
+#else
+#include "ext/standard/php_smart_str.h"
+#endif
 
 /*#define php_ext_ben &ben_module_entry*/
 
@@ -37,29 +47,26 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(ben_run_arginfo, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(ben_call_arginfo, 0, 0, 0)
-ZEND_END_ARG_INFO()
+PHP_INI_BEGIN()
+   PHP_INI_ENTRY("ben.tmp",      "/tmp", PHP_INI_ALL, NULL)
+PHP_INI_END()
 
-ZEND_BEGIN_ARG_INFO_EX(ben_call_static_arginfo, 0, 0, 0)
-ZEND_END_ARG_INFO()
 
 const zend_function_entry ben_methods[] = {
   ZEND_ME(Ben, __construct, ben_construct_arginfo, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
   ZEND_ME(Ben, run, ben_run_arginfo, ZEND_ACC_PUBLIC)
-  ZEND_ME(Ben, __call, ben_call_arginfo, ZEND_ACC_PUBLIC)
-  ZEND_ME(Ben, __callStatic, ben_call_static_arginfo, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
   {NULL, NULL, NULL}
 };
 
 zend_module_entry ben_module_entry = {
   STANDARD_MODULE_HEADER,
-  "ben",
+  "Ben",
   ben_methods,
-  PHP_MINIT(ben), // PHP_MINIT_FUNCTION
-  NULL, /* MSHUTDOWN */
-  NULL, /* RINIT */
-  NULL, /* RSHUTDOWN */
-  NULL, /* MINFO */
+  PHP_MINIT(ben), /* PHP_MINIT_FUNCTION */
+  PHP_MSHUTDOWN(ben), /* MSHUTDOWN */
+  PHP_RINIT(ben), /* RINIT */
+  PHP_RSHUTDOWN(ben), /* RSHUTDOWN */
+  PHP_MINFO(ben), /* MINFO */
 #if ZEND_MODULE_API_NO >= 20010901
   "2.1", //这个地方是我们扩展的版本
 #endif
@@ -74,18 +81,47 @@ ZEND_METHOD(Ben, __construct) {
 }
 
 ZEND_METHOD(Ben, run) {
-  php_printf("ben run \n");
+  zval *name;
+  php_printf("ben run name :%s \n", *name);
 }
 
-ZEND_METHOD(Ben, __call) {
-  php_printf("ben call some thing \n");
+PHP_MINIT_FUNCTION(ben) {
+  zend_class_entry ben;
+
+  REGISTER_INI_ENTRIES();
+
+  INIT_CLASS_ENTRY(ben, "Ben", ben_methods);
+  #if PHP_VERSION_ID >= 70000
+    ben_ce = zend_register_internal_class_ex(&ben, NULL);
+  #else
+    ben_ce = zend_register_internal_class_ex(&ben, NULL, NULL TSRMLS_CC);
+  #endif
+  return SUCCESS;
+}
+PHP_MSHUTDOWN_FUNCTION(ben)
+{
+	UNREGISTER_INI_ENTRIES();
+	return SUCCESS;
 }
 
-ZEND_METHOD(Ben, __callStatic) {
-  php_printf("ben static call \n");
+PHP_RINIT_FUNCTION(ben)
+{
+	return SUCCESS;
 }
 
+PHP_RSHUTDOWN_FUNCTION(ben)
+{
+	return SUCCESS;
+}
 
-#ifdef COMPILE_DL_WALU
+PHP_MINFO_FUNCTION(ben)
+{
+	php_info_print_table_start();
+	php_info_print_table_header(2, "Version", "0.0.1");
+	php_info_print_table_header(2, "Author", "ben");
+	php_info_print_table_end();
+}
+
+#ifdef COMPILE_DL_BEN
 ZEND_GET_MODULE(ben)
 #endif

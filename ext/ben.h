@@ -15,10 +15,8 @@
  *
  * =====================================================================================
  */
-
-
-#ifndef Ben_H
-#define Ben_H
+#ifndef BEN_H
+#define BEN_H
 #endif
 
 //加载config.h，如果配置了的话
@@ -26,10 +24,14 @@
 #include "config.h"
 #endif
 
-extern zend_module_entry Ben_module_entry;
-#define phpext_Ben_ptr &Ben_module_entry
+extern zend_module_entry ben_module_entry;
+#define phpext_ben_ptr &ben_module_entry
 PHP_METHOD(Ben, __construct);                                      
-PHP_METHOD(Ben, __call);
-PHP_METHOD(Ben, __callStatic);
 PHP_METHOD(Ben, run);
+
 PHP_MINIT_FUNCTION(ben);
+PHP_MINIT_FUNCTION(ben);
+PHP_MSHUTDOWN_FUNCTION(ben);
+PHP_RINIT_FUNCTION(ben);
+PHP_RSHUTDOWN_FUNCTION(ben);
+PHP_MINFO_FUNCTION(ben);
