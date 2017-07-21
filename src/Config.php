@@ -67,7 +67,7 @@ class Config
     public static function set($key, $value = null)
     {
         $instance = self::singleton();
-        $instance->setItem($key, $value);
+        return $instance->setItem($key, $value);
     }
 
     /**
