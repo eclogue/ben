@@ -14,7 +14,7 @@ class Env
 
     public function __construct($params = [])
     {
-        $this->argv = array_merge_recursive($this->argv, $params);
+        $this->argv = array_merge($this->argv, $params);
     }
 
     /**
@@ -27,7 +27,7 @@ class Env
         $opt = '';
         $longOpt = [];
         foreach ($this->argv as $long => $short) {
-            if (is_numeric($long)) {
+            if (!is_numeric($long)) {
                 $longOpt[] = $long . ':';
             }
             $opt .= $short . ':';

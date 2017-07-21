@@ -6,7 +6,7 @@ use InvalidArgumentException;
 
 class Config
 {
-    private static $_config = [];
+    private static $config = [];
 
     protected static $default = 'default.php';
 
@@ -17,20 +17,32 @@ class Config
      */
     private static $_instance = null;
 
-    /**
-     * default env variable
-     * @var string
-     */
-    private $_env = 'develop';
 
+    public $env = 'develop';
 
-    public function __construct($opt = [])
+    public function __construct()
     {
-        $env = new Env($opt);
+        $env = new Env();
         $env->load();
         $environment = getenv('env');
         if ($environment) {
-            $this->_env = $environment;
+            $this->env = $environment;
+        }
+    }
+
+
+    /**
+     * @param $method
+     * @param $arguments
+     * @return mixed
+     */
+    public static function __callStatic($method, $arguments)
+    {
+        $instance = self::singleton();
+        if (is_callable([$instance, $method])) {
+            return call_user_func_array([$instance, $method], $arguments);
+        } else {
+            throw new InvalidArgumentException('Call invalid method ' . $method . 'of Ben');
         }
     }
 
@@ -85,10 +97,10 @@ class Config
             $temp = '';
             foreach ($indexes as $key => $index) {
                 if ($key == 0) {
-                    if (!isset(self::$_config[$index])) {
+                    if (!isset(self::$config[$index])) {
                         return $default;
                     }
-                    $temp = self::$_config[$index];
+                    $temp = self::$config[$index];
                     continue;
                 }
                 if (!isset($temp[$index])) {
@@ -99,8 +111,8 @@ class Config
 
             return $temp;
         }
-        if (isset(self::$_config[$key]))
-            return self::$_config[$key];
+        if (isset(self::$config[$key]))
+            return self::$config[$key];
 
         return $default;
     }
@@ -114,7 +126,7 @@ class Config
     protected function setItem($key, $val = null)
     {
         if (is_array($key) && $val === null) {
-            self::$_config = array_merge_recursive(self::$_config, $key);
+            self::$config = array_merge_recursive(self::$config, $key);
             return true;
         }
         if (strpos($key, '.')) {
@@ -123,10 +135,10 @@ class Config
             $len = count($indexes);
             foreach ($indexes as $key => $index) {
                 if ($key === 0) {
-                    if (!isset(self::$_config[$index])) {
-                        self::$_config[$index] = [];
+                    if (!isset(self::$config[$index])) {
+                        self::$config[$index] = [];
                     }
-                    $ptr = &self::$_config[$index];
+                    $ptr = &self::$config[$index];
                     continue;
                 }
                 if ($key === $len - 1) {
@@ -143,7 +155,7 @@ class Config
             return true;
         }
 
-        self::$_config[$key] = $val;
+        self::$config[$key] = $val;
 
         return true;
     }
@@ -154,9 +166,9 @@ class Config
      *
      * @return array
      */
-    protected function all()
+    public static function all()
     {
-        return self::$_config;
+        return self::$config;
     }
 
     /**
@@ -164,9 +176,9 @@ class Config
      *
      * @param string $path
      */
-    protected function load($path)
+    public static function load($path, $default = 'default.php')
     {
-        $default = static::$default;
+        $instance = self::singleton();
         $path = rtrim($path, '/');
         $file = $path . '/' . $default;
         $config = [];
@@ -176,7 +188,7 @@ class Config
                 $config = $data;
             }
         }
-        $file = $path . '/' . $this->_env . '.php';
+        $file = $path . '/' . $instance->env . '.php';
         if (file_exists($file)) {
             $data = include $file;
             if (is_array($data) && !empty($data)) {
@@ -184,7 +196,7 @@ class Config
             }
         }
 
-        $this->set($config);
+        self::set($config);
     }
 
 }

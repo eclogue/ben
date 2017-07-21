@@ -6,7 +6,7 @@ Ben is the name of my old buffalo.This project is designed to manage the configu
 
   - `Config::set($key, $val = '')`  
 
-    `$key` string or array. if $key use `.` connection, it will be considered as
+    `$key` string or array    if $key use `.` connection, it will be considered as
     get value from multi-dimensional arrays by index. For example:
     ```
     Config::set('test.foo'); // look like $config['test']['foo'];
@@ -15,22 +15,24 @@ Ben is the name of my old buffalo.This project is designed to manage the configu
 
   - `Config::get($key)` 
     
-    `$key` string. suport `.` search multi-dimensional arrays. For example:
+    `$key` string   support use `.` connector to search multi-dimensional arrays. For example:
     `Config::get('test.foo')`
 
   - load configure file from path
+    `Config::load($path, $defaul = 'default.php')`
 
-
-  ```
-  Config::load('./config/develop.php');
-  ```
-  support auto load by command line arguments
-  ```
-  // set path
-  Config::load('./config');
-  // run script
-  php demo.php --env staging  
-  ```
+      ```
+      Config::load('./config/develop.php');
+      ```
+  - support auto load by command line arguments
+        
+      ```
+          // set path
+          Config::load('./config');
+          // run script
+          php demo.php --env staging  
+      
+      ```
 
 
 
