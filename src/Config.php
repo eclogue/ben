@@ -34,21 +34,28 @@ class Config
         }
     }
 
-
     /**
-     * @param $method
-     * @param $arguments
-     * @return mixed
+     * Get value by key
+     *
+     * @param string $key
+     * @param mixed $default
      */
-    public static function __callStatic($method, $arguments)
+    public static function get($key, $default = null)
     {
         $instance = self::singleton();
-        if (is_callable([$instance, $method])) {
-            return call_user_func_array([$instance, $method], $arguments);
-        } else {
-            throw new InvalidArgumentException('Call invalid method ' . $method . 'of Ben');
-        }
+        $instance->getItem($key, $default);
+    }
 
+    /**
+     * Set value
+     *
+     * @param mixed $key
+     * @param mixed $value
+     */
+    public static function set($key, $value = null)
+    {
+        $instance = self::singleton();
+        $instance->setItem($key, $value);
     }
 
     /**
@@ -64,12 +71,15 @@ class Config
     }
 
     /*
-     * @param mixed $key
+     * @param string $key
      * @param mixed $value
      * @return mixed
      * */
-    protected function get($key, $default = '')
+    protected function getItem($key, $default = null)
     {
+        if (!is_string($key)) {
+            throw new InvalidArgumentException('Ben\Config::get item must be string');
+        }
         if (strpos($key, '.')) {
             $indexes = explode('.', $key);
             $temp = '';
@@ -101,9 +111,9 @@ class Config
      * @param mixed $val
      * @return mixed
      */
-    protected function set($key, $val = '')
+    protected function setItem($key, $val = null)
     {
-        if (is_array($key) && $val === '') {
+        if (is_array($key) && $val === null) {
             self::$_config = array_merge_recursive(self::$_config, $key);
             return true;
         }
