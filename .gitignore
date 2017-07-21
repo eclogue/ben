@@ -2,3 +2,4 @@ vendor/
 example/
 *.lock
 .idea/
+.vscode
