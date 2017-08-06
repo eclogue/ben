@@ -55,7 +55,7 @@ class Config
     public static function get($key, $default = null)
     {
         $instance = self::singleton();
-        $instance->getItem($key, $default);
+        return $instance->getItem($key, $default);
     }
 
     /**
