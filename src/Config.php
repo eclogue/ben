@@ -25,10 +25,6 @@ class Config
         $env = new Env();
         $env->load();
         $environment = getenv('env');
-        if (!$environment) {
-            $environment = getenv('BEN_ENV');
-        }
-
         if ($environment) {
             $this->env = $environment;
         }
@@ -59,6 +55,7 @@ class Config
     public static function get($key, $default = null)
     {
         $instance = self::singleton();
+
         return $instance->getItem($key, $default);
     }
 
@@ -71,6 +68,7 @@ class Config
     public static function set($key, $value = null)
     {
         $instance = self::singleton();
+
         return $instance->setItem($key, $value);
     }
 
@@ -96,6 +94,7 @@ class Config
         if (!is_string($key)) {
             throw new InvalidArgumentException('Ben\Config::get item must be string');
         }
+
         if (strpos($key, '.')) {
             $indexes = explode('.', $key);
             $temp = '';
@@ -104,19 +103,24 @@ class Config
                     if (!isset(self::$config[$index])) {
                         return $default;
                     }
+
                     $temp = self::$config[$index];
                     continue;
                 }
+
                 if (!isset($temp[$index])) {
                     return $default;
                 }
+
                 $temp = $temp[$index];
             }
 
             return $temp;
         }
-        if (isset(self::$config[$key]))
+
+        if (isset(self::$config[$key])) {
             return self::$config[$key];
+        }
 
         return $default;
     }
@@ -192,6 +196,7 @@ class Config
                 $config = $data;
             }
         }
+
         $file = $path . '/' . $instance->env . '.php';
         if (file_exists($file)) {
             $data = include $file;

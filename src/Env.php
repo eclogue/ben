@@ -10,6 +10,7 @@ class Env
         'help' => 'h',
     ];
 
+    public static $_envname = 'BEN_ENV';
 
 
     public function __construct($params = [])
@@ -43,9 +44,17 @@ class Env
     {
         list($opt, $longOpt) = $this->parseOpt();
         $arguments = getopt($opt, $longOpt);
-        foreach ($arguments as $opt => $value) {
-            $env = 'env=' . $value;
-            putenv($env);
+        if (empty($arguments)) {
+            $env = getenv(self::$_envname);
+            if ($env) {
+                $env = 'env=' . $env;
+                putenv($env);
+            }
+        } else {
+            foreach ($arguments as $opt => $value) {
+                $env = 'env=' . $value;
+                putenv($env);
+            }
         }
     }
 
