@@ -18,13 +18,17 @@ class Config
     private static $_instance = null;
 
 
-    public $env = 'develop';
+    public $env = 'development';
 
     public function __construct()
     {
         $env = new Env();
         $env->load();
         $environment = getenv('env');
+        if (!$environment) {
+            $environment = getenv('BEN_ENV');
+        }
+
         if ($environment) {
             $this->env = $environment;
         }
