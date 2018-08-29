@@ -20,7 +20,7 @@ class Config
 
     public $env = 'development';
 
-    public function __construct()
+    protected function __construct()
     {
         $env = new Env();
         $env->load();
