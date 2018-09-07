@@ -11,14 +11,14 @@ class Config
     protected static $default = 'default.php';
 
     /**
-     * self instance
+     * static instance
      *
      * @var null
      */
-    private static $_instance = null;
+    private static $instance = null;
 
 
-    public $env = 'development';
+    private static $env = 'development';
 
     protected function __construct()
     {
@@ -26,7 +26,7 @@ class Config
         $env->load();
         $environment = getenv('env');
         if ($environment) {
-            $this->env = $environment;
+            static::$env = $environment;
         }
     }
 
@@ -38,7 +38,7 @@ class Config
      */
     public static function __callStatic($method, $arguments)
     {
-        $instance = self::singleton();
+        $instance = static::singleton();
         if (is_callable([$instance, $method])) {
             return call_user_func_array([$instance, $method], $arguments);
         } else {
@@ -54,7 +54,7 @@ class Config
      */
     public static function get($key, $default = null)
     {
-        $instance = self::singleton();
+        $instance = static::singleton();
 
         return $instance->getItem($key, $default);
     }
@@ -65,9 +65,9 @@ class Config
      * @param mixed $key
      * @param mixed $value
      */
-    public static function set($key, $value = null)
+    protected static function set($key, $value = null)
     {
-        $instance = self::singleton();
+        $instance = static::singleton();
 
         return $instance->setItem($key, $value);
     }
@@ -77,11 +77,11 @@ class Config
      */
     public static function singleton($opt =[])
     {
-        if (self::$_instance === null) {
-            self::$_instance = new static($opt);
+        if (static::$instance === null) {
+            static::$instance = new static($opt);
         }
 
-        return self::$_instance;
+        return static::$instance;
     }
 
     /*
@@ -100,11 +100,11 @@ class Config
             $temp = '';
             foreach ($indexes as $key => $index) {
                 if ($key == 0) {
-                    if (!isset(self::$config[$index])) {
+                    if (!isset(static::$config[$index])) {
                         return $default;
                     }
 
-                    $temp = self::$config[$index];
+                    $temp = static::$config[$index];
                     continue;
                 }
 
@@ -118,8 +118,8 @@ class Config
             return $temp;
         }
 
-        if (isset(self::$config[$key])) {
-            return self::$config[$key];
+        if (isset(static::$config[$key])) {
+            return static::$config[$key];
         }
 
         return $default;
@@ -134,7 +134,7 @@ class Config
     protected function setItem($key, $val = null)
     {
         if (is_array($key) && $val === null) {
-            self::$config = array_merge_recursive(self::$config, $key);
+            static::$config = array_merge_recursive(static::$config, $key);
             return true;
         }
         if (strpos($key, '.')) {
@@ -143,10 +143,10 @@ class Config
             $len = count($indexes);
             foreach ($indexes as $key => $index) {
                 if ($key === 0) {
-                    if (!isset(self::$config[$index])) {
-                        self::$config[$index] = [];
+                    if (!isset(static::$config[$index])) {
+                        static::$config[$index] = [];
                     }
-                    $ptr = &self::$config[$index];
+                    $ptr = &static::$config[$index];
                     continue;
                 }
                 if ($key === $len - 1) {
@@ -163,7 +163,7 @@ class Config
             return true;
         }
 
-        self::$config[$key] = $val;
+        static::$config[$key] = $val;
 
         return true;
     }
@@ -176,7 +176,7 @@ class Config
      */
     public static function all()
     {
-        return self::$config;
+        return static::$config;
     }
 
     /**
@@ -186,7 +186,7 @@ class Config
      */
     public static function load($path, $default = 'default.php')
     {
-        $instance = self::singleton();
+        $instance = static::singleton();
         $path = rtrim($path, '/');
         $file = $path . '/' . $default;
         $config = [];
@@ -197,7 +197,7 @@ class Config
             }
         }
 
-        $file = $path . '/' . $instance->env . '.php';
+        $file = $path . '/' . static::$env . '.php';
         if (file_exists($file)) {
             $data = include $file;
             if (is_array($data) && !empty($data)) {
@@ -205,7 +205,11 @@ class Config
             }
         }
 
-        self::set($config);
+        if (!isset($config[Env::$envname])) {
+            $config[Env::$envname] = static::$env;
+        }
+
+        static::set($config);
     }
 
 }
