@@ -2,7 +2,11 @@
 
 namespace Ben;
 
+use Dotenv\Dotenv;
 use InvalidArgumentException;
+use Dotenv\Environment\DotenvFactory;
+use Dotenv\Environment\Adapter\EnvConstAdapter;
+use Dotenv\Environment\Adapter\PutenvAdapter;
 
 class Config
 {
@@ -22,12 +26,30 @@ class Config
 
     protected function __construct()
     {
+    }
+
+    /**
+     * @param string $env
+     */
+    public static function loadEnv(string $dir, bool $overload = true)
+    {
+        $dotenv = Dotenv::create($dir, null);
+        if ($overload) {
+            $dotenv->overload();
+        } else {
+            $dotenv->safeLoad();
+        }
+
         $env = new Env();
         $env->load();
         $environment = getenv('env');
         if ($environment) {
             static::$env = $environment;
         }
+
+        var_dump($dotenv->getEnvironmentVariableNames());
+
+        return true;
     }
 
 
@@ -75,10 +97,10 @@ class Config
     /**
      * @return static
      */
-    public static function singleton($opt =[])
+    public static function singleton()
     {
         if (static::$instance === null) {
-            static::$instance = new static($opt);
+            static::$instance = new self();
         }
 
         return static::$instance;
@@ -89,7 +111,7 @@ class Config
      * @param mixed $value
      * @return mixed
      * */
-    protected function getItem($key, $default = null)
+    protected function getItem(string $key, $default = null)
     {
         if (!is_string($key)) {
             throw new InvalidArgumentException('Ben\Config::get item must be string');
@@ -137,6 +159,7 @@ class Config
             static::$config = array_merge_recursive(static::$config, $key);
             return true;
         }
+
         if (strpos($key, '.')) {
             $indexes = explode('.', $key);
             $ptr = null; // empty pointer
@@ -186,7 +209,6 @@ class Config
      */
     public static function load($path, $default = 'default.php')
     {
-        $instance = static::singleton();
         $path = rtrim($path, '/');
         $file = $path . '/' . $default;
         $config = [];
@@ -197,6 +219,9 @@ class Config
             }
         }
 
+        $envDir = $config['env']['dir'] ?? __DIR__;
+        $overload = $config['env']['overload'] ?? false;
+        self::loadEnv($envDir, $overload);
         $file = $path . '/' . static::$env . '.php';
         if (file_exists($file)) {
             $data = include $file;

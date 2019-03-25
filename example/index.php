@@ -13,7 +13,6 @@ use Ben\Config;
 
 Config::load(dirname(__DIR__) . '/example');
 
-
 $all = Config::all();
 
 var_dump($all);
