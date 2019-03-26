@@ -47,8 +47,6 @@ class Config
             static::$env = $environment;
         }
 
-        var_dump($dotenv->getEnvironmentVariableNames());
-
         return true;
     }
 
